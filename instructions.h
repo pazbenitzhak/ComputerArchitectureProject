@@ -39,4 +39,5 @@ void writeInstructionCycleExecuteEnd(struct instruction inst, int value);
 int readInstructionCycleExecuteEnd(struct instruction inst);
 void writeInstructioncycleWriteResult(struct instruction inst, int value);
 int readInstructioncycleWriteResult(struct instruction inst);
+void executeInstruction(int index);
 void exitInstructions();

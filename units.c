@@ -1,5 +1,6 @@
 #include "units.h"
-
+#include "clock.h"
+#include "registers.h"
 
 
 
@@ -9,24 +10,26 @@ void initUnits(char* cfgPath, char* tracePath) {
         for any operation type there would exist num of units
         and delay */
     char line[MEMORY_LINE_LEN];
+    char traceLine[MEMORY_LINE_LEN];
     int currVal;
-    int count;
+    int type;
     int unitsNum;
-    count = 0;
+    type = 0;
     FILE* cfgFile = fopen(cfgPath,"r");
     if (!cfgFile) {
         printf("error in initUnits in reading cfg file: %s\n", cfgPath);
         exit(1);
     }
     while (fgets(line, MEMORY_LINE_LEN, cfgFile)) {
-        if (count==TRACE_LINE) {
-            traceUnit = findTraceUnit(line);
-            break;
-        }
         currVal = findNum(line);
-        assignCorrectNum(currVal,count);
-        count++;
+        type = findRowNum(line);
+        if (type==12) {/* need to wait and pass over the entire file, so we'll save the line and do the right function afterwards*/
+            memcpy(traceLine,line,MEMORY_LINE_LEN);
+            continue; /* need to skip to the next iteration*/
+        }
+        assignCorrectNum(currVal,type);
     }
+    traceUnit = findTraceUnit(line);
     fclose(cfgFile);
     /* initialize units*/
     unitsNum = addNum+subNum+multNum+divNum+loadNum+storeNum; 
@@ -211,6 +214,70 @@ void assignCorrectNum(int currVal,int count) {
     }
 }
 
+/* gets a line from cfg.txt and returns a line number which corresponds
+to that of the line in the example file cfg.txt
+used to identify to which type of unit and kind (delay, number of units)
+the line belongs to.
+The mapping is done according to the example file cfg.txt*/
+int findRowNum(char * line) {
+    if (line[0]=='a') {
+        if (line[4]=='n') /* add_nr_units*/ {
+            return 0;
+        }
+        else if (line[4]=='d') /*add_delay*/ {
+            return 6;
+        }
+    }
+    else if (line[0]=='s') {
+        if (line[1]=='u') /*sub */ {
+            if (line[4]=='n') /* sub_nr_units*/ {
+                return 1;
+            }
+            else if (line[4]=='d') /*sub_delay*/ {
+                return 7;
+            }
+        }
+
+        else if (line[1]=='t') /*st*/ {
+            if (line[4]=='n') /* st_nr_units*/ {
+                return 5;
+            }
+            else if (line[4]=='d') /*st_delay*/ {
+                return 11;
+            }
+        }
+    }
+    else if (line[0]=='m') { /*mul*/
+            if (line[4]=='n') /* mul_nr_units*/ {
+                return 2;
+            }
+            else if (line[4]=='d') /*mul_delay*/ {
+                return 8;
+            }
+    }
+    else if (line[0]=='d') { /*div*/
+            if (line[4]=='n') /* div_nr_units*/ {
+                return 3;
+            }
+            else if (line[4]=='d') /*div_delay*/ {
+                return 9;
+            }
+    }
+    else if (line[0]=='l') { /*ld*/
+            if (line[4]=='n') /* ld_nr_units*/ {
+                return 4;
+            }
+            else if (line[4]=='d') /*ld_delay*/ {
+                return 10;
+            }
+    }
+    else if (line[0]=='t') { /* trace_unit*/
+        return 12;
+    }
+    return -1; /*just for the record*/
+}
+
+
 
 char* readUnitName(int index) {
     return units[index].name;
@@ -251,7 +318,54 @@ void writeUnitSrc1(int index, int value) {
     units[index].s1 = value;
 }
 
-void writeTraceUnit();
+void writeTraceUnit() {
+    int cycle;
+    int s0;
+    int s1;
+    char* s0Unit;
+    char* s1Unit;
+    char s0IsAv[3];
+    char s1IsAv[3];
+    cycle = getClock();
+    if (!cycle) {/* first iteration, need to open file*/
+        traceUnitFile = fopen(traceUnitPath,"r");
+        if (!traceUnitFile) {
+            printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
+            exit(1);
+        }
+    }
+    s0 = readUnitSrc0(traceUnit);
+    s1 = readUnitSrc1(traceUnit);
+    if (isUnitBusy) {
+
+        if (isRegUsed(s0)) /* if register=no=used*/ {
+            s0Unit = readUnitName(readRegisterStatus(s0));
+            s0IsAv[0] = 'N';
+            s0IsAv[1] = 'o'; 
+        }
+        else {
+           s0Unit[0] = '-';
+            s0IsAv[0] = 'Y';
+            s0IsAv[1] = 'e'; 
+            s0IsAv[2] = 's'; 
+        }
+        if (isRegUsed(s1)) /* if register=no=used*/ {
+            s1Unit = readUnitName(readRegisterStatus(s1));
+            s1IsAv[0] = 'N';
+            s1IsAv[1] = 'o'; 
+        }
+        else {
+            s1Unit[0] = '-';
+            s1IsAv[0] = 'Y';
+            s1IsAv[1] = 'e'; 
+            s1IsAv[2] = 's'; 
+        }
+        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s", cycle, readUnitName(traceUnit),readUnitDest(traceUnit),/
+        s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+    }
+
+
+}
 
 void exitUnits() {
     fclose(traceUnitPath);

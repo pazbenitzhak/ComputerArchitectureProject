@@ -31,8 +31,9 @@ static int loadFirst;
 static int loadLast;
 static int storeFirst;
 static int storeLast;
-char* traceUnitPath;
-struct unit* units;
+static char* traceUnitPath;
+static FILE* traceUnitFile; /* needed for writeTraceUnit function*/
+static struct unit* units;
 
 
 struct unit {
@@ -59,5 +60,6 @@ void writeUnitSrc1(int index, int value);
 int findNum(char* line);
 void assignCorrectNum(int currVal,int count);
 int findTraceUnit(char* line);
+int findRowNum(char * line);
 void writeTraceUnit();
 void exitUnits();

@@ -62,4 +62,5 @@ void assignCorrectNum(int currVal,int count);
 int findTraceUnit(char* line);
 int findRowNum(char * line);
 void writeTraceUnit();
+int findAvailableUnitType(int type);
 void exitUnits();

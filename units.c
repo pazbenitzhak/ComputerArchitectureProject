@@ -18,7 +18,7 @@ void initUnits(char* cfgPath, char* tracePath) {
     FILE* cfgFile = fopen(cfgPath,"r");
     if (!cfgFile) {
         printf("error in initUnits in reading cfg file: %s\n", cfgPath);
-        exit(1);
+        exit(1);    
     }
     while (fgets(line, MEMORY_LINE_LEN, cfgFile)) {
         currVal = findNum(line);
@@ -33,7 +33,7 @@ void initUnits(char* cfgPath, char* tracePath) {
     fclose(cfgFile);
     /* initialize units*/
     unitsNum = addNum+subNum+multNum+divNum+loadNum+storeNum; 
-    units = (struct unit *) malloc(unitsNum *sizeof(struct unit));
+    units = (struct unit *) malloc(unitsNum*sizeof(struct unit));
     for (int i=0;i<unitsNum;i++) {
         if (i<=addLast) {
             /*TODO: handle case of double/triple digits*/
@@ -277,6 +277,70 @@ int findRowNum(char * line) {
     return -1; /*just for the record*/
 }
 
+int findAvailableUnitType(int type) { /* return unit index if available*/
+    switch (type)
+    {
+    case 0: /* add */
+        for (int i=addFirst;i<addLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+
+    case 1: /* sub */
+        for (int i=subFirst;i<subLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+    
+    case 2: /* mult */
+        for (int i=multFirst;i<multLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+
+    case 3: /* div */
+        for (int i=divFirst;i<divLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+
+    case 4: /* load */
+        for (int i=loadFirst;i<loadLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+
+    case 5: /* store */
+        for (int i=storeFirst;i<storeLast+1;i++) {
+            if (!isUnitBusy(i)) { /* unit not busy*/
+                return i;
+            }
+        }
+        /* no available unit found*/
+        break;
+
+    default:
+        break;
+    }
+
+    return -1;
+}
+
 
 
 char* readUnitName(int index) {
@@ -322,18 +386,22 @@ void writeTraceUnit() {
     int cycle;
     int s0;
     int s1;
+    int dest;
     char* s0Unit;
     char* s1Unit;
     char s0IsAv[3];
     char s1IsAv[3];
+    /* TODO: add handling st, load*/
     cycle = getClock();
     if (!cycle) {/* first iteration, need to open file*/
+        /* TODO: change condition*/
         traceUnitFile = fopen(traceUnitPath,"r");
         if (!traceUnitFile) {
             printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
             exit(1);
         }
     }
+    dest = readUnitDest(traceUnit);
     s0 = readUnitSrc0(traceUnit);
     s1 = readUnitSrc1(traceUnit);
     if (isUnitBusy) {
@@ -360,7 +428,7 @@ void writeTraceUnit() {
             s1IsAv[1] = 'e'; 
             s1IsAv[2] = 's'; 
         }
-        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s", cycle, readUnitName(traceUnit),readUnitDest(traceUnit),/
+        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s", cycle, readUnitName(traceUnit),dest,
         s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
     }
 
@@ -369,4 +437,5 @@ void writeTraceUnit() {
 
 void exitUnits() {
     fclose(traceUnitPath);
+    free(units);
 }

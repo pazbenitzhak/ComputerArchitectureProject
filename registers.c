@@ -12,8 +12,8 @@ static char* regoutAddress;
 void initRegisters(char* path) {
     int i;
     for (i=0;i<registersSize;i++) {
-        registers[i] = 0.0;
-        registerResultsStatus[i] = 0;
+        registers[i] = (float) i;
+        registerResultsStatus[i] = -1; /* because it represents number of unit*/
         isRegisterUsed[i] = 0;
     }
     regoutAddress = path;
@@ -31,7 +31,7 @@ float readRegisterStatus(int register_index) {
     return registerResultsStatus[register_index];
 }
 
-void writeRegister(int register_index, float value) {
+void writeRegisterStatus(int register_index, int value) {
     registerResultsStatus[register_index] = value;
 }
 

@@ -143,14 +143,60 @@ int issueInstruction(int index, int* instInfo) {
         return -2; /* */
     }
     writeInstructionUnit(unit);
+    /* write to unit the relevant information*/
     flipUnitBusy(unit); /* claim that the unit is busy*/
+    writeUnitDest(dst);
+    writeUnitSrc0(s0);
+    writeUnitSrc1(s1);
+    /*end of writing to unit*/
     writeRegisterStatus(dst,unit);
+    if (!isRegUsed) { /* right now we can't read dst because we await its result*/
+        flipRegUsed(dst);
+    }
     writeInstructionCycleIssued(getCycle());
     return 1;
 }
 
-void readOpInstruction(int index);
-void executeInstruction(int index);
+int readOpInstruction(int index) { /* index of instruction*/
+    int unit;
+    int s0;
+    int s1;
+    int isReady;
+    unit = readInstructionUnit(index);
+    s0 = readUnitSrc0(unit);
+    s1 = readUnitSrc0(unit);
+    isReady = !(isRegUsed(s0) || isRegUsed(s1)); /* isReady = 1 then we can proceed*/
+    if (!isReady) {
+        return 0; /* NOT READY YET, KEEP DOING SOMETHING ELSE*/
+    }
+    /* we are ready to read*/
+    float s0_val = readRegister(s0);
+    float s1_val = readRegister(s1);
+    /* TODO: Should we save it somewhere or should we leave it like this?*/
+    flipRegUsed(s0); /* right now it's used, handle WAR*/
+    flipRegUsed(s1); /* right now it's used, handle WAR*/
+
+    writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1);
+    writeInstructionCycleReadOperands(getCycle());
+    return 1; /*SUCCESS*/
+}
+
+int executeInstruction(int index) {
+    /* TODO: Is it correct logically to read in this stage and not receive it from somewhere else?*/
+    float s0_val = readRegister(s0);
+    float s1_val = readRegister(s1);
+    int unit;
+    unit = readInstructionUnit(index);
+    writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1); /*another cycle passed*/
+
+    if (readUnitCurrDelay(unit)) /* not zero*/ {
+        return 0;
+    }
+    /* TODO: finish function*/
+    
+    writeInstructionCycleReadOperands(getCycle());
+    return 1;
+}
 void writeResultInstruction(int index);
 
 void exitInstructions();

@@ -7,7 +7,7 @@
 static float registers[registersSize];
 static int registerResultsStatus[registersSize];
 /* TODO: create mapping from unit name to int*/
-static int isRegisterUsed[registersSize]; /* 1 if used=no, 0 if yes*/
+static int isRegisterUsed[registersSize]; /* 1 if used, meaning "No", 0 if not used, meaning "Yes"*/
 static char* regoutAddress;
 
 void initRegisters(char* path);

@@ -53,7 +53,7 @@ unsigned long readInstructionCycleExecuteEnd(int index);
 void writeInstructioncycleWriteResult(int index, unsigned long value);
 unsigned long readInstructioncycleWriteResult(int index);
 int issueInstruction(int index, int* instInfo);
-void readOpInstruction(int index);
+int readOpInstruction(int index);
 void executeInstruction(int index);
 void writeResultInstruction(int index);
 void exitInstructions();

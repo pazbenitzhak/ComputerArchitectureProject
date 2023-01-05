@@ -42,6 +42,8 @@ struct unit {
     int dest;
     int s0;
     int s1;
+    int currentDelay;
+    int type;
 };
 
 /* goes through the cfg.txt file and saves the parameters
@@ -57,6 +59,10 @@ int readUnitSrc0(int index);
 void writeUnitSrc0(int index, int value);
 int readUnitSrc1(int index);
 void writeUnitSrc1(int index, int value);
+int readUnitCurrDelay(int index);
+void writeUnitCurrDelay(int index, int value);
+int readUnitType(int index);
+void writeUnitType(int index, int value);
 int findNum(char* line);
 void assignCorrectNum(int currVal,int count);
 int findTraceUnit(char* line);

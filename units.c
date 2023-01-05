@@ -41,6 +41,8 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,name);
+            writeUnitCurrDelay(i,addDelay);
+            writeUnitType(0);
         }
         else if (i<=subLast) {
             /*TODO: handle case of double/triple digits*/
@@ -48,13 +50,16 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,name);
+            writeUnitCurrDelay(i,subDelay);
+            writeUnitType(1);
         }
         else if (i<=multLast) {
             /*TODO: handle case of double/triple digits*/
             char name[6] = "MUL";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
-            writeUnitName(i,name);
+            writeUnitName(i,multDelay);
+            writeUnitType(2);
         }
         else if (i<=divLast) {
             /*TODO: handle case of double/triple digits*/
@@ -62,6 +67,8 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,name);
+            writeUnitName(i,divDelay);
+            writeUnitType(3);
         }
         else if (i<=loadLast) {
             /*TODO: handle case of double/triple digits*/
@@ -69,6 +76,8 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,name);
+            writeUnitName(i,loadDelay);
+            writeUnitType(4);
         }
         else if (i<=storeLast) {
             /*TODO: handle case of double/triple digits*/
@@ -76,6 +85,8 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,name);
+            writeUnitName(i,storeDelay);
+            writeUnitType(5);
         }
     }
 }
@@ -380,6 +391,23 @@ int readUnitSrc1(int index) {
 }
 void writeUnitSrc1(int index, int value) {
     units[index].s1 = value;
+}
+
+int readUnitCurrDelay(int index) {
+    return units[index].currentDelay;
+}
+
+void writeUnitCurrDelay(int index, int value) {
+    units[index].currentDelay = value;
+}
+
+
+int readUnitType(int index) {
+    return units[index].type;
+}
+
+void writeUnitType(int index, int value) {
+    units[index].type = value;
 }
 
 void writeTraceUnit() {

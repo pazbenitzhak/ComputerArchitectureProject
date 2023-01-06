@@ -42,7 +42,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             printf("name=%s\n",name);
             writeUnitName(i,name);
             writeUnitCurrDelay(i,addDelay);
-            writeUnitType(0);
+            writeUnitType(i,0);
         }
         else if (i<=subLast) {
             /*TODO: handle case of double/triple digits*/
@@ -51,7 +51,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             printf("name=%s\n",name);
             writeUnitName(i,name);
             writeUnitCurrDelay(i,subDelay);
-            writeUnitType(1);
+            writeUnitType(i,1);
         }
         else if (i<=multLast) {
             /*TODO: handle case of double/triple digits*/
@@ -59,7 +59,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
             writeUnitName(i,multDelay);
-            writeUnitType(2);
+            writeUnitType(i,2);
         }
         else if (i<=divLast) {
             /*TODO: handle case of double/triple digits*/
@@ -68,7 +68,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             printf("name=%s\n",name);
             writeUnitName(i,name);
             writeUnitName(i,divDelay);
-            writeUnitType(3);
+            writeUnitType(i,3);
         }
         else if (i<=loadLast) {
             /*TODO: handle case of double/triple digits*/
@@ -77,7 +77,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             printf("name=%s\n",name);
             writeUnitName(i,name);
             writeUnitName(i,loadDelay);
-            writeUnitType(4);
+            writeUnitType(i,4);
         }
         else if (i<=storeLast) {
             /*TODO: handle case of double/triple digits*/
@@ -86,7 +86,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             printf("name=%s\n",name);
             writeUnitName(i,name);
             writeUnitName(i,storeDelay);
-            writeUnitType(5);
+            writeUnitType(i,5);
         }
     }
 }
@@ -393,6 +393,14 @@ void writeUnitSrc1(int index, int value) {
     units[index].s1 = value;
 }
 
+int readUnitImm(int index) {
+    return units[index].imm;
+}
+
+void writeUnitImm(int index, int value) {
+    units[index].imm = value;
+}
+
 int readUnitCurrDelay(int index) {
     return units[index].currentDelay;
 }
@@ -410,6 +418,31 @@ void writeUnitType(int index, int value) {
     units[index].type = value;
 }
 
+void updateUnitDelay(int index) {
+    switch(units[index].type) {
+        case 0:
+            units[index].currentDelay = addDelay;
+            break;
+        case 1:
+            units[index].currentDelay = subDelay;
+            break;
+        case 2:
+            units[index].currentDelay = multDelay;
+            break;
+        case 3:
+            units[index].currentDelay = divDelay;
+            break;
+        case 4:
+            units[index].currentDelay = loadDelay;
+            break;
+        case 5:
+            units[index].currentDelay = storeDelay;
+            break;
+    }
+    return;
+}
+
+
 void writeTraceUnit() {
     int cycle;
     int s0;
@@ -423,7 +456,7 @@ void writeTraceUnit() {
     cycle = getClock();
     if (!cycle) {/* first iteration, need to open file*/
         /* TODO: change condition*/
-        traceUnitFile = fopen(traceUnitPath,"r");
+        traceUnitFile = fopen(traceUnitPath,"w");
         if (!traceUnitFile) {
             printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
             exit(1);
@@ -456,7 +489,7 @@ void writeTraceUnit() {
             s1IsAv[1] = 'e'; 
             s1IsAv[2] = 's'; 
         }
-        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s", cycle, readUnitName(traceUnit),dest,
+        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
         s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
     }
 

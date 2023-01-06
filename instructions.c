@@ -11,12 +11,17 @@ the instruction Queue at length 16 at most*/
 static char* traceInst;
 static int instructionsNum; /* to be initialized in initInstructions*/
 
+/* TODO: handle halt command*/
+
 
 void initInstructions(char* path) {
     traceInst = path;
     instructionsNum = findInstNumFromMem();
-    instructions = (struct instruction)* malloc(instructionsNum*sizeof(struct instruction));
-    instructionsMode = (int)* calloc(instructionsNum,sizeof(int)); /* initialize zeros*/
+    instructions = (struct instruction*) malloc(instructionsNum*sizeof(struct instruction));
+    instructionsMode = (int*) calloc(instructionsNum,sizeof(int)); /* initialize zeros*/
+    instructionsS0 = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
+    instructionsS1 = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
+    instructionsDST = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
 }
 
 int findInstNumFromMem() {
@@ -97,7 +102,7 @@ unsigned long readInstructionCycleIssued(int index) {
     return instructions[index].cycleIssued;
 }
 
-void writeInstructionCycleReadOperands(int index, iunsigned longnt value) {
+void writeInstructionCycleReadOperands(int index, unsigned long value) {
     instructions[index].cycleReadOperands = value;
 }
 
@@ -121,6 +126,30 @@ unsigned long readInstructioncycleWriteResult(int index) {
     return instructions[index].cycleWriteResult;
 }
 
+float readS0ByInstruction(int index) {
+    return instructionsS0[index];
+}
+
+void writeS0ByInstruction(int index, float value) {
+    instructionsS0[index] = value;
+}
+
+float readS1ByInstruction(int index) {
+    return instructionsS1[index];
+}
+
+void writeS1ByInstruction(int index, float value) {
+    instructionsS1[index] = value;
+}
+
+float readDSTByInstruction(int index) {
+    return instructionsDST[index];
+}
+
+void writeDSTByInstruction(int index, float value) {
+    instructionsDST[index] = value;
+}
+
 int issueInstruction(int index, int* instInfo) {
     /* handle WAW */
     int isDstOccupied; /* 1 if yes, 0 if not*/
@@ -142,18 +171,19 @@ int issueInstruction(int index, int* instInfo) {
     if (unit==-1) { /* no available unit*/
         return -2; /* */
     }
-    writeInstructionUnit(unit);
+    writeInstructionUnit(index,unit);
     /* write to unit the relevant information*/
     flipUnitBusy(unit); /* claim that the unit is busy*/
-    writeUnitDest(dst);
-    writeUnitSrc0(s0);
-    writeUnitSrc1(s1);
+    writeUnitDest(unit,dst);
+    writeUnitSrc0(unit,s0);
+    writeUnitSrc1(unit,s1);
+    writeUnitImm(unit, imm);
     /*end of writing to unit*/
     writeRegisterStatus(dst,unit);
     if (!isRegUsed) { /* right now we can't read dst because we await its result*/
         flipRegUsed(dst);
     }
-    writeInstructionCycleIssued(getCycle());
+    writeInstructionCycleIssued(index,getCycle());
     return 1;
 }
 
@@ -162,6 +192,8 @@ int readOpInstruction(int index) { /* index of instruction*/
     int s0;
     int s1;
     int isReady;
+    float s0_val;
+    float s1_val;
     unit = readInstructionUnit(index);
     s0 = readUnitSrc0(unit);
     s1 = readUnitSrc0(unit);
@@ -170,33 +202,114 @@ int readOpInstruction(int index) { /* index of instruction*/
         return 0; /* NOT READY YET, KEEP DOING SOMETHING ELSE*/
     }
     /* we are ready to read*/
-    float s0_val = readRegister(s0);
-    float s1_val = readRegister(s1);
-    /* TODO: Should we save it somewhere or should we leave it like this?*/
+    s0_val = readRegister(s0);
+    writeS0ByInstruction(index,s0_val);
+    s1_val = readRegister(s1);
+    writeS1ByInstruction(index,s1_val);
+
     flipRegUsed(s0); /* right now it's used, handle WAR*/
     flipRegUsed(s1); /* right now it's used, handle WAR*/
 
     writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1);
-    writeInstructionCycleReadOperands(getCycle());
+    writeInstructionCycleReadOperands(index,getCycle());
     return 1; /*SUCCESS*/
 }
 
 int executeInstruction(int index) {
     /* TODO: Is it correct logically to read in this stage and not receive it from somewhere else?*/
-    float s0_val = readRegister(s0);
-    float s1_val = readRegister(s1);
+    float s0_val;
+    float s1_val;
     int unit;
+    int type;
+    int imm;
     unit = readInstructionUnit(index);
+    imm = readUnitImm(unit);
+    s0_val = readS0ByInstruction(s0);
+    s1_val = readS1ByInstruction(s1);
     writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1); /*another cycle passed*/
 
     if (readUnitCurrDelay(unit)) /* not zero*/ {
         return 0;
     }
     /* TODO: finish function*/
-    
-    writeInstructionCycleReadOperands(getCycle());
+    type = readUnitType(unit);
+    switch (type) {
+        case 0:
+            writeDSTByInstruction(index, s0_val+s1_val);
+            break;
+        
+        case 1:
+            writeDSTByInstruction(index, s0_val-s1_val);
+            break;
+
+        case 2:
+            writeDSTByInstruction(index, s0_val*s1_val);
+            break;
+
+        case 3:
+            writeDSTByInstruction(index, s0_val/s1_val)
+            break;
+
+        case 4:
+            writeDSTByInstruction(index, readMemory(imm));
+            break;
+    }
+
+    writeInstructionCycleExecuteEnd(index,getCycle());
     return 1;
 }
-void writeResultInstruction(int index);
 
-void exitInstructions();
+void writeResultInstruction(int index) {
+    /* TODO: pre: scoreboard needs to check every previous instruction which has not
+    finished its read operands phase. If there is even ONE of those whose s0/s1
+    is our instruction's dst, than we mark a flag and don't execute writeResultInstruction
+    in that cycle (wait for read operands to happen). If not, than scoreboard would run this function*/
+    int unit;
+    unit = readInstructionUnit(index);
+    /* TODO: handle store, load*/
+    writeRegister(readUnitDest(unit),readDSTByInstruction(index));
+    flipRegUsed(readUnitSrc0(unit)); /* change it to "Yes"*/
+    flipRegUsed(readUnitSrc1(unit)); /* change it to "Yes"*/
+    writeRegisterStatus(readUnitDest(unit),-1);
+    flipUnitBusy(unit); /* now it's zero - available*/
+    updateUnitDelay(unit);
+    writeInstructioncycleWriteResult(index, getCycle());
+}
+
+void exitInstructions() {
+    /* TODO: after figuring out halt functionality,
+    add handling it*/
+    int i;
+    float instr;
+    int pc;
+    int unit;
+    char* unitName;
+    int cy_issued;
+    int cy_read;
+    int cy_execute;
+    int cy_write_res;
+    traceInstFile = fopen(traceInst,"w");
+    if (!traceInstFile) {
+        printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
+        exit(1);
+    }
+    for (i=0;i<instructionsNum;i++) {
+        instr = readInstructionInst(i);
+        pc = readInstructionPC(i);
+        unit = readInstructionUnit(i);
+        unitName = readUnitName(unit);
+        cy_issued = readInstructionCycleIssued(i);
+        cy_read = readInstructionCycleReadOperands(i);
+        cy_execute = readInstructionCycleExecuteEnd(i);
+        cy_write_res = readInstructioncycleWriteResult(i);
+        /*TODO: check right format for inst*/
+        fprintf("%f %i %s %i %i %i %i\n", instr, pc,unitName,cy_issued,cy_read,cy_execute,cy_write_res);
+
+    }
+    fclose(traceUnitFile);
+    free(instructions);
+    free(instructionsMode);
+    free(instructionsS0);
+    free(instructionsS1);
+    free(instructionsDST);
+}

@@ -42,6 +42,7 @@ struct unit {
     int dest;
     int s0;
     int s1;
+    int imm; /* represents the immediate value parsed from the file*/
     int currentDelay;
     int type;
 };
@@ -63,10 +64,13 @@ int readUnitCurrDelay(int index);
 void writeUnitCurrDelay(int index, int value);
 int readUnitType(int index);
 void writeUnitType(int index, int value);
+int readUnitImm(int index);
+void writeUnitImm(int index, int value);
 int findNum(char* line);
 void assignCorrectNum(int currVal,int count);
 int findTraceUnit(char* line);
 int findRowNum(char * line);
 void writeTraceUnit();
 int findAvailableUnitType(int type);
+void updateUnitDelay(int index);
 void exitUnits();

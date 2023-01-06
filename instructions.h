@@ -15,6 +15,9 @@ the instruction Queue at length 16 at most*/
 static char* traceInst;
 static int instructionsNum; /* to be initialized in initInstructions*/
 static int* instructionsMode;
+static float* instructionsS0; /* saves the s0 register values in the read operands stage*/
+static float* instructionsS1; /* saves the s1 register values in the read operands stage*/
+static float* instructionsDST; /* saves the dest register values after the operation in the execute stage*/
 /* for each instruction: 0 - instruction not issued yet
 1 - instruction issued
 2 - instruction read operands done
@@ -52,8 +55,14 @@ void writeInstructionCycleExecuteEnd(int index, unsigned long value);
 unsigned long readInstructionCycleExecuteEnd(int index);
 void writeInstructioncycleWriteResult(int index, unsigned long value);
 unsigned long readInstructioncycleWriteResult(int index);
+float readS0ByInstruction(int index);
+void writeS0ByInstruction(int index, float value);
+float readS1ByInstruction(int index);
+void writeS1ByInstruction(int index, float value);
+float readDSTByInstruction(int index);
+void writeDSTByInstruction(int index, float value);
 int issueInstruction(int index, int* instInfo);
 int readOpInstruction(int index);
-void executeInstruction(int index);
+int executeInstruction(int index);
 void writeResultInstruction(int index);
 void exitInstructions();

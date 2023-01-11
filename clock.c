@@ -1,6 +1,5 @@
 #include "clock.h"
 
-static unsigned long cycle;
 
 void updateClock() {
     cycle++;

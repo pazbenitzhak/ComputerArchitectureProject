@@ -34,9 +34,13 @@ void initUnits(char* cfgPath, char* tracePath) {
     /* initialize units*/
     unitsNum = addNum+subNum+multNum+divNum+loadNum+storeNum; 
     units = (struct unit *) malloc(unitsNum*sizeof(struct unit));
+    if (units==NULL) {
+        printf("memory allocation failed for units\n");
+        exit(1);
+    }
     for (int i=0;i<unitsNum;i++) {
         if (i<=addLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "ADD";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -45,7 +49,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             writeUnitType(i,0);
         }
         else if (i<=subLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "SUB";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -54,7 +58,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             writeUnitType(i,1);
         }
         else if (i<=multLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "MUL";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -62,7 +66,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             writeUnitType(i,2);
         }
         else if (i<=divLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "DIV";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -71,7 +75,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             writeUnitType(i,3);
         }
         else if (i<=loadLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "LD";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -80,7 +84,7 @@ void initUnits(char* cfgPath, char* tracePath) {
             writeUnitType(i,4);
         }
         else if (i<=storeLast) {
-            /*TODO: handle case of double/triple digits*/
+            /*TODO: handle case of double digits*/
             char name[6] = "ST";
             name[3] = (char) (i-addFirst+48);
             printf("name=%s\n",name);
@@ -154,7 +158,6 @@ void assignCorrectNum(int currVal,int count) {
     switch(count) {
         case 0:
             addNum = currVal;
-            /* TODO: make sure that for any unit there exists at least one of its kind*/
             addFirst = 0;
             addLast = addFirst+addNum-1;
             break;

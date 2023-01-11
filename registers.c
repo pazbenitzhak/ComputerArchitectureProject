@@ -3,7 +3,6 @@
 
 static float registers[registersSize];
 static int registerResultsStatus[registersSize];
-/* TODO: create mapping from unit name to int*/
 static int isRegisterUsed[registersSize]; /* 1 if used, 0 else*/
 static char* regoutAddress;
 

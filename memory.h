@@ -11,6 +11,6 @@ static char* memOutAddress; /* will be saved during init*/
 
 float readMemory(int address);
 void writeMemory(int address, float value);
-void initMemory();
+void initMemory(char* dmemin, char* dmemout);
 void exitMemory();
 int findMemLastIndex();

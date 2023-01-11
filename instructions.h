@@ -55,6 +55,8 @@ void writeInstructionCycleExecuteEnd(int index, unsigned long value);
 unsigned long readInstructionCycleExecuteEnd(int index);
 void writeInstructioncycleWriteResult(int index, unsigned long value);
 unsigned long readInstructioncycleWriteResult(int index);
+int readInstructionMode(int index);
+void incrementInstructionMode(int index);
 float readS0ByInstruction(int index);
 void writeS0ByInstruction(int index, float value);
 float readS1ByInstruction(int index);

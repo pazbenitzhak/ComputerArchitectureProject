@@ -3,7 +3,8 @@
 static float memory[memorySize];
 static char* memOutAddress; /* will be saved during init*/
 
-
+/* TODO: check whether memin is in the following form: instructions and then memory
+or they could be combined*/
 
 
 /* Notice that the instructions are ALSO saved in the memory (in the (InstructionsNum) first lines)

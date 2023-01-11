@@ -19,27 +19,44 @@ void initInstructions(char* path) {
     instructionsNum = findInstNumFromMem();
     instructions = (struct instruction*) malloc(instructionsNum*sizeof(struct instruction));
     instructionsMode = (int*) calloc(instructionsNum,sizeof(int)); /* initialize zeros*/
+    if (instructionsMode==NULL) {
+        printf("memory allocation failed for instructionMode\n");
+        exit(1);
+    }
     instructionsS0 = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
+    if (instructionsS0==NULL) {
+        printf("memory allocation failed for instructionsS0\n");
+        exit(1);
+    }
     instructionsS1 = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
+    if (instructionsS1==NULL) {
+        printf("memory allocation failed for instructionsS1\n");
+        exit(1);
+    }
     instructionsDST = (float*) calloc(instructionsNum,sizeof(float)); /* initialize zeros*/
+    if (instructionsDST==NULL) {
+        printf("memory allocation failed for instructionsDST\n");
+        exit(1);
+    }
 }
 
 int findInstNumFromMem() {
     int counter;
     float memVal;
+    int instNum;
     counter = 0;
-    /* TODO: check if we can assume that there would be in any case values in MEMORY*/
-    while (true)
+    instNum = 0;
+    while (true) /*TODO: change condition*/
     {
         memVal = readMemory(counter);
         int* ptr = (int *) (&memVal);
         *ptr >>= 28; 
-        if ((*ptr & 1111)!=0)  {
-            break;
+        if ((*ptr & 1111)==0)  { /* it's an instruction*/
+            instNum++;
         }
         counter++;
     }
-    return counter+1;
+    return instNum;
     
 }
 
@@ -150,6 +167,14 @@ void writeDSTByInstruction(int index, float value) {
     instructionsDST[index] = value;
 }
 
+int readInstructionMode(int index) {
+    return instructionsMode[index];
+}
+
+void incrementInstructionMode(int index) {
+    instructionsMode[index] += 1;
+}
+
 int issueInstruction(int index, int* instInfo) {
     /* handle WAW */
     int isDstOccupied; /* 1 if yes, 0 if not*/
@@ -216,7 +241,6 @@ int readOpInstruction(int index) { /* index of instruction*/
 }
 
 int executeInstruction(int index) {
-    /* TODO: Is it correct logically to read in this stage and not receive it from somewhere else?*/
     float s0_val;
     float s1_val;
     int unit;
@@ -260,10 +284,6 @@ int executeInstruction(int index) {
 }
 
 void writeResultInstruction(int index) {
-    /* TODO: pre: scoreboard needs to check every previous instruction which has not
-    finished its read operands phase. If there is even ONE of those whose s0/s1
-    is our instruction's dst, than we mark a flag and don't execute writeResultInstruction
-    in that cycle (wait for read operands to happen). If not, than scoreboard would run this function*/
     int unit;
     unit = readInstructionUnit(index);
     /* TODO: handle store, load*/
@@ -288,6 +308,7 @@ void exitInstructions() {
     int cy_read;
     int cy_execute;
     int cy_write_res;
+    FILE* traceInstFile;
     traceInstFile = fopen(traceInst,"w");
     if (!traceInstFile) {
         printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);

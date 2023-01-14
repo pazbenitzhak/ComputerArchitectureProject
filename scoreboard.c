@@ -22,6 +22,8 @@ int main(int argc, char** argv) {
     while (!isFinished)
     {
         /* issue instruction*/
+        /* once getting to halt we'd get to instructionsNum instructions read, so we would not
+        issue any more instructions and practically only wait for the program to end*/
         if (instToIssue<instructionsNum) { /* more instructions left to be issued*/
             parsedInstruction = translateInstruction(instToIssue);
             if (issueInstruction(instToIssue,parsedInstruction)) {

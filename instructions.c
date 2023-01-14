@@ -1,17 +1,5 @@
 #include "instructions.h"
-#include "memory.h" /* TODO: check in the end how to correctly link everything*/
-#include "registers.h"
-#include "units.h"
-#include "clock.h"
 
-
-static int instructionQueueTop; /*points to the current instruction to be handled*/
-static int instructionQueueBottom; /* points to instructionQueueTop+15 to keep
-the instruction Queue at length 16 at most*/
-static char* traceInst;
-static int instructionsNum; /* to be initialized in initInstructions*/
-
-/* TODO: handle halt command*/
 
 
 void initInstructions(char* path) {
@@ -46,13 +34,14 @@ int findInstNumFromMem() {
     int instNum;
     counter = 0;
     instNum = 0;
-    while (true) /*TODO: change condition*/
+    while (count<findMemLastIndex())
     {
         memVal = readMemory(counter);
         int* ptr = (int *) (&memVal);
-        *ptr >>= 28; 
-        if ((*ptr & 1111)==0)  { /* it's an instruction*/
-            instNum++;
+        *ptr >>= 24; /* need to check whether opcode equals 6, then it's halt*/
+        instNum++;
+        if ((*ptr & 0110)==0)  { /* it's an instruction*/
+            return instNum;
         }
         counter++;
     }
@@ -184,6 +173,15 @@ int issueInstruction(int index, int* instInfo) {
     int s1 = instInfo[3];
     int imm = instInfo[4];
     int unit;
+    if (opcode==6) {
+        /* halt instruction*/
+        for (int i=0;i<4;i++) {
+            incrementInstructionMode(index);
+        }
+        /* increment the mode to finished so the scoreboard won't 
+        handle this instruction in any way*/
+        return 1;
+    }
     if (readRegisterStatus(dst)!=-1) {
         isDstOccupied = 1;
     }
@@ -199,13 +197,25 @@ int issueInstruction(int index, int* instInfo) {
     writeInstructionUnit(index,unit);
     /* write to unit the relevant information*/
     flipUnitBusy(unit); /* claim that the unit is busy*/
+    writeUnitImm(unit, imm);
+    if (opcode==0) { /* load, need only imm and dst*/
+        writeUnitDest(unit,dst);
+        writeRegisterStatus(dst,unit);
+    }
+    else if (opcode==1) { /* store, need only imm and s1*/
+        writeUnitSrc1(unit,s1);
+        writeInstructionCycleIssued(index,getCycle());
+/*TODO OOOOOOOO*/
+    }
+    else {
+
+    }
     writeUnitDest(unit,dst);
     writeUnitSrc0(unit,s0);
     writeUnitSrc1(unit,s1);
-    writeUnitImm(unit, imm);
     /*end of writing to unit*/
     writeRegisterStatus(dst,unit);
-    if (!isRegUsed) { /* right now we can't read dst because we await its result*/
+    if (!isRegUsed(dst)) { /* right now we can't read dst because we await its result*/
         flipRegUsed(dst);
     }
     writeInstructionCycleIssued(index,getCycle());
@@ -297,8 +307,6 @@ void writeResultInstruction(int index) {
 }
 
 void exitInstructions() {
-    /* TODO: after figuring out halt functionality,
-    add handling it*/
     int i;
     float instr;
     int pc;
@@ -308,14 +316,17 @@ void exitInstructions() {
     int cy_read;
     int cy_execute;
     int cy_write_res;
+    unsigned int instrInForm;
     FILE* traceInstFile;
     traceInstFile = fopen(traceInst,"w");
     if (!traceInstFile) {
         printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
         exit(1);
     }
-    for (i=0;i<instructionsNum;i++) {
+    for (i=0;i<instructionsNum-1;i++) {
+        /* no need to write the last instruction since it's halt*/
         instr = readInstructionInst(i);
+        instrInForm = getUnionFormat(memory[i]);
         pc = readInstructionPC(i);
         unit = readInstructionUnit(i);
         unitName = readUnitName(unit);
@@ -323,8 +334,7 @@ void exitInstructions() {
         cy_read = readInstructionCycleReadOperands(i);
         cy_execute = readInstructionCycleExecuteEnd(i);
         cy_write_res = readInstructioncycleWriteResult(i);
-        /*TODO: check right format for inst*/
-        fprintf("%f %i %s %i %i %i %i\n", instr, pc,unitName,cy_issued,cy_read,cy_execute,cy_write_res);
+        fprintf("%08x %i %s %i %i %i %i\n", instrInForm, pc,unitName,cy_issued,cy_read,cy_execute,cy_write_res);
 
     }
     fclose(traceUnitFile);

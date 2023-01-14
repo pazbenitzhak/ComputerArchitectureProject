@@ -1,6 +1,5 @@
 #include "units.h"
-#include "clock.h"
-#include "registers.h"
+
 
 
 
@@ -40,56 +39,111 @@ void initUnits(char* cfgPath, char* tracePath) {
     }
     for (int i=0;i<unitsNum;i++) {
         if (i<=addLast) {
-            /*TODO: handle case of double digits*/
             char name[6] = "ADD";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
+            name[5] = '/0';
+            if (i-addFirst<10) {
+                /* single digits*/
+                name[3] = (char) (i-addFirst+48);
+                name[4] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-addFirst;
+                name[3] = (char) ((decVal/10) + 48);
+                name[4] = (char) ((decVal%10) + 48);
+            }
             writeUnitName(i,name);
             writeUnitCurrDelay(i,addDelay);
             writeUnitType(i,0);
         }
         else if (i<=subLast) {
-            /*TODO: handle case of double digits*/
             char name[6] = "SUB";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
+            name[5] = '/0';
+            if (i-subFirst<10) {
+                /* single digits*/
+                name[3] = (char) (i-subFirst+48);
+                name[4] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-subFirst;
+                name[3] = (char) ((decVal/10) + 48);
+                name[4] = (char) ((decVal%10) + 48);
+            }
             writeUnitName(i,name);
             writeUnitCurrDelay(i,subDelay);
             writeUnitType(i,1);
         }
         else if (i<=multLast) {
-            /*TODO: handle case of double digits*/
             char name[6] = "MUL";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
-            writeUnitName(i,multDelay);
+            name[5] = '/0';
+            if (i-multFirst<10) {
+                /* single digits*/
+                name[3] = (char) (i-multFirst+48);
+                name[4] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-multFirst;
+                name[3] = (char) ((decVal/10) + 48);
+                name[4] = (char) ((decVal%10) + 48);
+            }
+            writeUnitName(i,name);
+            writeUnitCurrDelay(i,multDelay);
             writeUnitType(i,2);
         }
         else if (i<=divLast) {
-            /*TODO: handle case of double digits*/
             char name[6] = "DIV";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
+            name[5] = '/0';
+            if (i-divFirst<10) {
+                /* single digits*/
+                name[3] = (char) (i-divFirst+48);
+                name[4] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-divFirst;
+                name[3] = (char) ((decVal/10) + 48);
+                name[4] = (char) ((decVal%10) + 48);
+            }
             writeUnitName(i,name);
-            writeUnitName(i,divDelay);
+            writeUnitCurrDelay(i,divDelay);
             writeUnitType(i,3);
         }
         else if (i<=loadLast) {
-            /*TODO: handle case of double digits*/
-            char name[6] = "LD";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
+            char name[5] = "LD";
+            name[4] = '/0';
+            if (i-loadFirst<10) {
+                /* single digits*/
+                name[2] = (char) (i-loadFirst+48);
+                name[3] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-loadFirst;
+                name[2] = (char) ((decVal/10) + 48);
+                name[3] = (char) ((decVal%10) + 48);
+            }
             writeUnitName(i,name);
-            writeUnitName(i,loadDelay);
+            writeUnitCurrDelay(i,loadDelay);
             writeUnitType(i,4);
         }
         else if (i<=storeLast) {
-            /*TODO: handle case of double digits*/
-            char name[6] = "ST";
-            name[3] = (char) (i-addFirst+48);
-            printf("name=%s\n",name);
+            char name[5] = "ST";
+            name[4] = '/0';
+            if (i-storeFirst<10) {
+                /* single digits*/
+                name[2] = (char) (i-storeFirst+48);
+                name[3] = '/0';
+            }
+            else {
+                /* double digits*/
+                int decVal = i-storeFirst;
+                name[2] = (char) ((decVal/10) + 48);
+                name[3] = (char) ((decVal%10) + 48);
+            }
             writeUnitName(i,name);
-            writeUnitName(i,storeDelay);
+            writeUnitCurrDelay(i,storeDelay);
             writeUnitType(i,5);
         }
     }
@@ -458,7 +512,6 @@ void writeTraceUnit() {
     /* TODO: add handling st, load*/
     cycle = getClock();
     if (!cycle) {/* first iteration, need to open file*/
-        /* TODO: change condition*/
         traceUnitFile = fopen(traceUnitPath,"w");
         if (!traceUnitFile) {
             printf("error in initUnits in reading cfg file: %s\n", traceUnitPath);
@@ -469,7 +522,6 @@ void writeTraceUnit() {
     s0 = readUnitSrc0(traceUnit);
     s1 = readUnitSrc1(traceUnit);
     if (isUnitBusy) {
-
         if (isRegUsed(s0)) /* if register=no=used*/ {
             s0Unit = readUnitName(readRegisterStatus(s0));
             s0IsAv[0] = 'N';
@@ -491,6 +543,11 @@ void writeTraceUnit() {
             s1IsAv[0] = 'Y';
             s1IsAv[1] = 'e'; 
             s1IsAv[2] = 's'; 
+        }
+        if (readUnitType==5) {
+            /* store unit*/
+            fprintf(traceUnitFile, "%i %s - - F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),
+        ,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
         }
         fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
         s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);

@@ -44,16 +44,17 @@ void flipRegUsed(int register_index) {
 
 /* need to write to a file named "regout.txt" the registers' content*/
 void exitRegisters() {
-     int lastIndex;
+    int lastIndex;
     int i;
+    int regInForm;
     FILE* regoutFile = fopen(regoutAddress, "w");
     if (!regoutFile) {
         printf("error in exitMemory in writing to dmemout: %s\n", regoutAddress);
         exit(1);
     }
     for(i = 0; i <= registersSize; i++) {
-		fprintf(regoutFile, "%08X\n", registers[i]);
-        /* TODO: make sure we write the values correctly in hexa-float fashion*/
+        regInForm = getUnionFormat(registers[i]);
+		fprintf(regoutFile, "%08X\n", regInForm);
     }
     fclose(regoutFile);
 }

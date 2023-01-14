@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 
 #define memorySize 4096
 #define MEMORY_LINE_LEN 10
@@ -16,4 +16,5 @@ void initMemory(char* dmemin, char* dmemout);
 void exitMemory();
 int findMemLastIndex();
 unsigned int getUnionFormat(float memind);
-float getUnionFloatFormat(int memVal);
+float getUnionFloatFormat(uint32_t memVal);
+float hexaToFloat(const char* hexa);

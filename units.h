@@ -3,7 +3,7 @@
 #include <string.h>
 
 
-#define MEMORY_LINE_LEN 24
+#define UNIT_MEMORY_LINE_LEN 24
 #define TRACE_LINE 12
 
 static int addNum;

@@ -6,12 +6,12 @@ int main(int argc, char** argv) {
         printf("Wrong number of arguments, %i given instead of 7", argc);
         exit(1);
     }
-    char* cfgPath;
-    char* meminPath;
-    char* memoutPath;
-    char* regoutPath;
-    char* traceinstPath;
-    char* traceunitPath;
+    char* cfgPath = argv[1];
+    char* meminPath = argv[2];
+    char* memoutPath = argv[3];
+    char* regoutPath=argv[4];
+    char* traceinstPath = argv[5];
+    char* traceunitPath = argv[6];
     int* parsedInstruction;
     int isFinished; /* 1 for when we need to finish*/
     int instToIssue; /* keep the index of the last instruciton to be issued*/

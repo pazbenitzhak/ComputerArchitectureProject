@@ -9,8 +9,8 @@ void initUnits(char* cfgPath, char* tracePath) {
     /* we assume the file is written correctly and fully i.e.
         for any operation type there would exist num of units
         and delay */
-    char line[MEMORY_LINE_LEN];
-    char traceLine[MEMORY_LINE_LEN];
+    char line[UNIT_MEMORY_LINE_LEN];
+    char traceLine[UNIT_MEMORY_LINE_LEN];
     int currVal;
     int type;
     int unitsNum;
@@ -20,11 +20,11 @@ void initUnits(char* cfgPath, char* tracePath) {
         printf("error in initUnits in reading cfg file: %s\n", cfgPath);
         exit(1);    
     }
-    while (fgets(line, MEMORY_LINE_LEN, cfgFile)) {
+    while (fgets(line, UNIT_MEMORY_LINE_LEN, cfgFile)) {
         currVal = findNum(line);
         type = findRowNum(line);
         if (type==12) {/* need to wait and pass over the entire file, so we'll save the line and do the right function afterwards*/
-            memcpy(traceLine,line,MEMORY_LINE_LEN);
+            memcpy(traceLine,line,UNIT_MEMORY_LINE_LEN);
             continue; /* need to skip to the next iteration*/
         }
         assignCorrectNum(currVal,type);
@@ -98,7 +98,7 @@ void initUnits(char* cfgPath, char* tracePath) {
 int findTraceUnit(char* line) {
     int numVal;
     int num;
-    for (int i=0; i<MEMORY_LINE_LEN;i++) {
+    for (int i=0; i<UNIT_MEMORY_LINE_LEN;i++) {
         if (line[i]>=48 && line[i]<=57) {
             numVal = ((int) line[i]-48);
             switch(line[i-1]) {
@@ -139,7 +139,7 @@ int findNum(char* line) {
     int num;
     num=0;
     inMidstOfNum = 0;
-    for (int i=0; i<MEMORY_LINE_LEN;i++) {
+    for (int i=0; i<UNIT_MEMORY_LINE_LEN;i++) {
         if (line[i]>=48 && line[i]<=57) {
             if (!inMidstOfNum) {
                 inMidstOfNum = 1;

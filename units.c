@@ -546,8 +546,7 @@ void writeTraceUnit() {
         }
         if (readUnitType==5) {
             /* store unit*/
-            fprintf(traceUnitFile, "%i %s - - F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),
-        ,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+            fprintf(traceUnitFile, "%i %s - - F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
         }
         fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
         s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);

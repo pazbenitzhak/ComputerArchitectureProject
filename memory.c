@@ -6,14 +6,13 @@ static char* memOutAddress; /* will be saved during init*/
 
 
 /* Notice that the instructions are ALSO saved in the memory (in the (InstructionsNum) first lines)
-after initMemory, initInstructions would be set so it can parse instructions from there
-TODO:
-make sure that we get the correct values from file in FLOAT */
+after initMemory, initInstructions would be set so it can parse instructions from there*/
 void initMemory(char* dmemin, char* dmemout) {
     char line[MEMORY_LINE_LEN];
     int counter = 0;
-    int count = 0;
     int i;
+    int val;
+    float floatVal;
     char* ptr;
     FILE* memFile = fopen(dmemin,"r");
     if (!memFile) {
@@ -21,23 +20,11 @@ void initMemory(char* dmemin, char* dmemout) {
         exit(1);
     }
     while (fgets(line, MEMORY_LINE_LEN, memFile)) {
-        count++;
         line[8] = '\0';
-        //unsigned char unsignedLine = (unsigned char) line;
-        //uint32_t num = *(uint32_t *)&unsignedLine;
-        //printf("line: %s, count: %d\n",line,count);
-        //unsigned int val = (unsigned int) strtoul(line,&ptr,0);
-        //printf("val: %x\n",val);
-        //uint32_t val;
-        //sscanf(line,"%u", &val);
-        //printf("val: %08u\n",val);
-        //printf("val: %08x\n",val);
-        //printf("val decimal: %d\n",val);
-        //float memVal = (float) float_i2f(val);
-        printf("line: %s\n", line);
-        float fl = hexaToFloat(line);
-        memory[counter] = fl;
-        printf("memVal: %f\n",memory[counter]);
+        int val;
+        sscanf(line,"%x", &val);
+        floatVal = getUnionFloatFormat(val);
+        memory[counter] = floatVal;
         counter++;
     }
     if (counter < memorySize - 1) {
@@ -104,25 +91,12 @@ unsigned int getUnionFormat(float memind) {
     return u.i;
 }
 
-float getUnionFloatFormat(uint32_t memVal) {
-    union conv32 {
-        uint32_t i;
+float getUnionFloatFormat(int memVal) {
+    union {
+        int i;
         float f;
     } u;
     u.i = memVal;
-    printf("u.f: %f\n",u.f);
     float f = u.f;
     return f;
-}
-
-float hexaToFloat(const char* hexa) {
-    union {
-        float f;
-        int i;
-    } convert;
-
-    int intVal = (int)strtol(hexa, NULL, 16);
-    printf("%08x",intVal);
-    convert.i = intVal;
-    return convert.f;
 }

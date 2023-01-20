@@ -394,4 +394,5 @@ void exitInstructions() {
     free(instructionsS0);
     free(instructionsS1);
     free(instructionsDST);
+    free(fetchCount);
 }

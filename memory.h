@@ -17,4 +17,3 @@ void exitMemory();
 int findMemLastIndex();
 unsigned int getUnionFormat(float memind);
 float getUnionFloatFormat(int memVal);
-float hexaToFloat(const char* hexa);

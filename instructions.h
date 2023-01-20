@@ -10,16 +10,16 @@
 #define DIV 3
 #define LOAD 4
 #define STORE 5
+#define INSTRUCTION_QUEUE_LEN 16
 
-static int instructionQueueTop; /*points to the current instruction to be handled*/
-static int instructionQueueBottom; /* points to instructionQueueTop+15 to keep
-the instruction Queue at length 16 at most*/
 static char* traceInst;
 static int instructionsNum; /* to be initialized in initInstructions*/
 static int* instructionsMode;
 static float* instructionsS0; /* saves the s0 register values in the read operands stage*/
 static float* instructionsS1; /* saves the s1 register values in the read operands stage*/
 static float* instructionsDST; /* saves the dest register values after the operation in the execute stage*/
+static short* fetchQueue;
+static int fetchCount;
 /* for each instruction: 0 - instruction not issued yet
 1 - instruction issued
 2 - instruction read operands done
@@ -69,4 +69,6 @@ int issueInstruction(int index, int* instInfo);
 int readOpInstruction(int index);
 int executeInstruction(int index);
 void writeResultInstruction(int index);
+void fetchInstruction(int index);
+void incrementFetchQueue(int index);
 void exitInstructions();

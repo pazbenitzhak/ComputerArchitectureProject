@@ -509,7 +509,7 @@ void writeTraceUnit() {
     char* s1Unit;
     char s0IsAv[3];
     char s1IsAv[3];
-    /* TODO: add handling st, load*/
+    int ldCount;
     cycle = getClock();
     if (!cycle) {/* first iteration, need to open file*/
         traceUnitFile = fopen(traceUnitPath,"w");
@@ -518,38 +518,89 @@ void writeTraceUnit() {
             exit(1);
         }
     }
+    if (readUnitType(traceUnit)==4) {
+        dest = readUnitDest(traceUnit);
+        /* load*/
+        if (!isUnitBusy(traceUnit)) { /* get inside if unit is NOT busy*/
+            ldCount = 0;
+            return;
+        }
+        if (!ldCount) {
+            /* after issue, need 2 Yes*/
+            fprintf(traceUnitFile, "%i %s F%i - - - - Yes Yes\n", cycle, readUnitName(traceUnit),dest);
+            ldCount = 1;
+            return;
+        }
+        /* after read operands*/
+        fprintf(traceUnitFile, "%i %s F%i - - - - No No\n", cycle, readUnitName(traceUnit),dest);
+        return;
+    }
+    if (readUnitType(traceUnit)==5) {
+        /* store*/
+        if (isUnitBusy(traceUnit)) { /* get inside if unit is NOT busy*/
+            s1 = readUnitSrc1(traceUnit);
+            if (isRegUsed(s1)) /* if register=no=used*/ {
+                s1Unit = readUnitName(readRegisterStatus(s1));
+                char s1IsAv[3];
+                s1IsAv[0] = 'N';
+                s1IsAv[1] = 'o';
+                s1IsAv[2] = '\0';
+                }
+            else {
+                s1Unit[0] = '-';
+                char s1IsAv[4];
+                s1IsAv[0] = 'Y';
+                s1IsAv[1] = 'e'; 
+                s1IsAv[2] = 's'; 
+                s1IsAv[3] = '\0';
+                }
+        fprintf(traceUnitFile, "%i %s - - F%i - %s Yes %s\n", cycle, readUnitName(traceUnit),s1,s1Unit,s1IsAv);
+        return;
+        }
+    }
     dest = readUnitDest(traceUnit);
     s0 = readUnitSrc0(traceUnit);
     s1 = readUnitSrc1(traceUnit);
-    if (isUnitBusy) {
+    if (isUnitBusy(traceUnit)) {
         if (isRegUsed(s0)) /* if register=no=used*/ {
             s0Unit = readUnitName(readRegisterStatus(s0));
+            char s0IsAv[3];
             s0IsAv[0] = 'N';
-            s0IsAv[1] = 'o'; 
+            s0IsAv[1] = 'o';
+            s0IsAv[2] = '\0'; 
         }
         else {
-           s0Unit[0] = '-';
+            s0Unit[0] = '-';
+            char s0IsAv[4];
             s0IsAv[0] = 'Y';
             s0IsAv[1] = 'e'; 
             s0IsAv[2] = 's'; 
+            s0IsAv[3] = '\0'; 
         }
         if (isRegUsed(s1)) /* if register=no=used*/ {
             s1Unit = readUnitName(readRegisterStatus(s1));
+            char s1IsAv[3];
             s1IsAv[0] = 'N';
-            s1IsAv[1] = 'o'; 
+            s1IsAv[1] = 'o';
+            s1IsAv[2] = '\0';
         }
         else {
             s1Unit[0] = '-';
+            char s1IsAv[4];
             s1IsAv[0] = 'Y';
             s1IsAv[1] = 'e'; 
             s1IsAv[2] = 's'; 
+            s1IsAv[3] = '\0';
         }
-        if (readUnitType==5) {
+        if (readUnitType(traceUnit)==5) {
             /* store unit*/
             fprintf(traceUnitFile, "%i %s - - F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
         }
-        fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
+        else {
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
         s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+        }
+
     }
 
 

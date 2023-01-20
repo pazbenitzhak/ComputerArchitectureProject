@@ -17,18 +17,22 @@ int main(int argc, char** argv) {
     int instToIssue; /* keep the index of the last instruciton to be issued*/
     int lastInstDone; /* last instruction that was completley executed*/
     int isWriteResult;
+    int flag;
     init(cfgPath, meminPath, memoutPath, regoutPath, traceinstPath, traceunitPath);
 
     while (!isFinished)
     {
+        writeTraceUnit(); /* need at the beginning to avoid read after write*/
+        flag = getCycle(); /*flag = 0 for the 0 cycle so we do not issue the first fetched instruction in that cycle*/
         /* issue instruction*/
         /* once getting to halt we'd get to instructionsNum instructions read, so we would not
         issue any more instructions and practically only wait for the program to end*/
-        if (instToIssue<instructionsNum) { /* more instructions left to be issued*/
+        if (flag && instToIssue<instructionsNum) { /* more instructions left to be issued*/
             parsedInstruction = translateInstruction(instToIssue);
             if (issueInstruction(instToIssue,parsedInstruction)) {
                 /* instruction issued*/
                 incrementInstructionMode(instToIssue);
+                incrementFetchQueue(instToIssue);
                 instToIssue++;
             }
         }
@@ -63,7 +67,6 @@ int main(int argc, char** argv) {
             }
         }
         lastInstDone = findLastInstDone();
-        writeTraceUnit();
         updateClock();
         if (lastInstDone==instructionsNum-1) {
             /* all instructions executed*/
@@ -72,6 +75,7 @@ int main(int argc, char** argv) {
     }
     exitScoreboard();
     
+}
 }
 
 void init(char* cfgPath, char* meminPath, char* memoutPath, char* regoutPath, char* traceinstPath, char* traceunitPath) {

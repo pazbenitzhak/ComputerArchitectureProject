@@ -37,7 +37,6 @@ void initMemory(char* dmemin, char* dmemout) {
     memOutAddress = dmemout; //save dmemout in variable
 }
 
-/*TODO: make sure parallelism criteria is met*/
 float readMemory(int address) {
     if (address >= memorySize || address < 0) {
         printf("error in readMemory with address number: %i\n", address);

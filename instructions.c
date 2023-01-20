@@ -26,6 +26,11 @@ void initInstructions(char* path) {
         printf("memory allocation failed for instructionsDST\n");
         exit(1);
     }
+    fetchQueue = (short*) calloc(instructionsNum,sizeof(short)); /* initialize zeros*/
+    if (fetchQueue==NULL) {
+        printf("memory allocation failed for instructionsDST\n");
+        exit(1);
+    }
 }
 
 int findInstNumFromMem() {
@@ -186,33 +191,28 @@ int issueInstruction(int index, int* instInfo) {
         isDstOccupied = 1;
     }
     if (isDstOccupied) {
-        return -1; /* need to wait due to WAW hazard*/
-        /* TODO: need to make sure that we do not issue the next instructions as well*/
+        return 0; /* need to wait due to WAW hazard*/
+        /* makes us get stuck and not issue more instructions*/
     }
     /* Dst is available, no risk of WAW*/
     unit = findAvailableUnitType(opcode);
     if (unit==-1) { /* no available unit*/
-        return -2; /* */
+        return 0; /* makes us get stuck and not issue more instructions*/
     }
     writeInstructionUnit(index,unit);
     /* write to unit the relevant information*/
     flipUnitBusy(unit); /* claim that the unit is busy*/
     writeUnitImm(unit, imm);
-    if (opcode==0) { /* load, need only imm and dst*/
-        writeUnitDest(unit,dst);
-        writeRegisterStatus(dst,unit);
-    }
-    else if (opcode==1) { /* store, need only imm and s1*/
+    if (opcode==1) { /* store, need only imm and s1*/
         writeUnitSrc1(unit,s1);
         writeInstructionCycleIssued(index,getCycle());
-/*TODO OOOOOOOO*/
+        return 1;
     }
-    else {
-
+    else if (opcode!=0) { /* add/sub/div/mult*/
+        writeUnitSrc0(unit,s0);
+        writeUnitSrc1(unit,s1);
     }
     writeUnitDest(unit,dst);
-    writeUnitSrc0(unit,s0);
-    writeUnitSrc1(unit,s1);
     /*end of writing to unit*/
     writeRegisterStatus(dst,unit);
     if (!isRegUsed(dst)) { /* right now we can't read dst because we await its result*/
@@ -230,8 +230,23 @@ int readOpInstruction(int index) { /* index of instruction*/
     float s0_val;
     float s1_val;
     unit = readInstructionUnit(index);
+    if (readUnitType(unit)==4) { /* load */
+        writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1);
+        writeInstructionCycleReadOperands(index,getCycle());
+    }
     s0 = readUnitSrc0(unit);
-    s1 = readUnitSrc0(unit);
+    s1 = readUnitSrc1(unit);
+    if (readUnitType(unit)==5) { /* store*/
+        if (isRegUsed(s1)) { /* we can't proceed need to exit*/
+            return 0;
+        }
+        s1_val = readRegister(s1);
+        writeS1ByInstruction(index,s1_val);
+        flipRegUsed(s1); /* right now it's used, handle WAR*/
+        writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1);
+        writeInstructionCycleReadOperands(index,getCycle());
+        return 1;
+    }
     isReady = !(isRegUsed(s0) || isRegUsed(s1)); /* isReady = 1 then we can proceed*/
     if (!isReady) {
         return 0; /* NOT READY YET, KEEP DOING SOMETHING ELSE*/
@@ -258,14 +273,13 @@ int executeInstruction(int index) {
     int imm;
     unit = readInstructionUnit(index);
     imm = readUnitImm(unit);
-    s0_val = readS0ByInstruction(s0);
-    s1_val = readS1ByInstruction(s1);
+    s0_val = readS0ByInstruction(index);
+    s1_val = readS1ByInstruction(index);
     writeUnitCurrDelay(unit, readUnitCurrDelay(unit)-1); /*another cycle passed*/
 
     if (readUnitCurrDelay(unit)) /* not zero*/ {
         return 0;
     }
-    /* TODO: finish function*/
     type = readUnitType(unit);
     switch (type) {
         case 0:
@@ -296,14 +310,51 @@ int executeInstruction(int index) {
 void writeResultInstruction(int index) {
     int unit;
     unit = readInstructionUnit(index);
-    /* TODO: handle store, load*/
-    writeRegister(readUnitDest(unit),readDSTByInstruction(index));
-    flipRegUsed(readUnitSrc0(unit)); /* change it to "Yes"*/
-    flipRegUsed(readUnitSrc1(unit)); /* change it to "Yes"*/
+    if (readUnitType(unit)==5) {
+        /* store*/
+        writeRegister(readUnitSrc1(unit), readUnitImm(unit)); /* write imm value to src1 register*/
+        flipUnitBusy(unit); /* now it's zero - available*/
+        updateUnitDelay(unit);
+        writeInstructioncycleWriteResult(index, getCycle());
+        flipRegUsed(readUnitSrc1(unit)); /* change it to "Yes"*/
+    }
+    else if (readUnitType(unit)!=4){ /* add/div/mult/sub*/
+        flipRegUsed(readUnitSrc0(unit)); /* change it to "Yes"*/
+        flipRegUsed(readUnitSrc1(unit)); /* change it to "Yes"*/
+    }
+    /* load flow does not include else if conditions, only the below*/
+    writeRegister(readUnitDest(unit),readDSTByInstruction(index)); /* write dest*/
     writeRegisterStatus(readUnitDest(unit),-1);
     flipUnitBusy(unit); /* now it's zero - available*/
     updateUnitDelay(unit);
     writeInstructioncycleWriteResult(index, getCycle());
+}
+
+void fetchInstruction(int index) {
+    int count;
+    int flag;
+    for (int i=fetchCount;i<instructionsNum;i++) {
+        if (fetchQueue[i]==1) {
+            if (flag || (i!=0)) {
+                fetchCount = i;
+                flag = 0;
+            }
+            count++
+        }
+        if (count==INSTRUCTION_QUEUE_LEN) {
+        /* can't fetch another */
+        return;
+        }
+        else if (fetchQueue[i]==0) {
+            incrementFetchQueue(i);
+            return;
+        }
+    }
+    return;
+}
+
+void incrementFetchQueue(int index) {
+    fetchQueue[index]++;
 }
 
 void exitInstructions() {

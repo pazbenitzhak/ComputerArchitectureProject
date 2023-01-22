@@ -13,7 +13,6 @@ void initMemory(char* dmemin, char* dmemout) {
     int i;
     int val;
     float floatVal;
-    char* ptr;
     FILE* memFile = fopen(dmemin,"r");
     if (!memFile) {
         printf("error in initMemory in reading dmemin: %s\n", dmemin);
@@ -21,8 +20,7 @@ void initMemory(char* dmemin, char* dmemout) {
     }
     while (fgets(line, MEMORY_LINE_LEN, memFile)) {
         line[8] = '\0';
-        int val;
-        sscanf(line,"%x", &val);
+        int sc = sscanf(line,"%x", &val);
         floatVal = getUnionFloatFormat(val);
         memory[counter] = floatVal;
         counter++;
@@ -33,6 +31,7 @@ void initMemory(char* dmemin, char* dmemout) {
             memory[i] = 0.0;
         }
     }
+    memLastIndex = counter;
     fclose(memFile);
     memOutAddress = dmemout; //save dmemout in variable
 }
@@ -70,9 +69,14 @@ void exitMemory() {
     fclose(dmemoutFile);
 }
 
+int getMemLastIndex() {
+    return memLastIndex;
+}
+
 int findMemLastIndex() {
     int lastIndex;
     int i;
+    lastIndex = 0;
     for (i = 0; i < memorySize; i++) {
         if (memory[i] != 0) {
             lastIndex = i;

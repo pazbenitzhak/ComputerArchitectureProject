@@ -1,3 +1,6 @@
+#ifndef MEMORY_H
+#define MEMORY_H
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -9,6 +12,7 @@
 
 static float memory[memorySize];
 static char* memOutAddress; /* will be saved during init*/
+int static memLastIndex;
 
 float readMemory(int address);
 void writeMemory(int address, float value);
@@ -17,3 +21,5 @@ void exitMemory();
 int findMemLastIndex();
 unsigned int getUnionFormat(float memind);
 float getUnionFloatFormat(int memVal);
+
+#endif

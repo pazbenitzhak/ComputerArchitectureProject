@@ -1,3 +1,6 @@
+#ifndef REGISTERS_H
+#define REGISTERS_H
+
 #include <stdio.h>
 #include "memory.h"
 
@@ -13,8 +16,10 @@ static char* regoutAddress;
 void initRegisters(char* path);
 float readRegister(int address);
 void writeRegister(int address, float value);
-float readRegisterStatus(int register_index);
+int readRegisterStatus(int register_index);
 void writeRegisterStatus(int register_index, int value);
 int isRegUsed(int register_index);
 void flipRegUsed(int register_index);
 void exitRegisters();
+
+#endif

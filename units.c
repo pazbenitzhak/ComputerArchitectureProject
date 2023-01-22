@@ -39,112 +39,101 @@ void initUnits(char* cfgPath, char* tracePath) {
     }
     for (int i=0;i<unitsNum;i++) {
         if (i<=addLast) {
-            char name[6] = "ADD";
-            name[5] = '/0';
-            if (i-addFirst<10) {
-                /* single digits*/
-                name[3] = (char) (i-addFirst+48);
-                name[4] = '/0';
-            }
-            else {
+            units[i].name[0] = 'A';
+            units[i].name[1] = 'D';
+            units[i].name[2] = 'D';
+            /* single digits*/
+            units[i].name[3] = (char) (i-addFirst+48);
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - addFirst >= 10) {
                 /* double digits*/
-                int decVal = i-addFirst;
-                name[3] = (char) ((decVal/10) + 48);
-                name[4] = (char) ((decVal%10) + 48);
+                int decVal = i - addFirst;
+                units[i].name[3] = (char)((decVal / 10) + 48);
+                units[i].name[4] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,addDelay);
-            writeUnitType(i,0);
+            initUnit(i, addDelay, 0);
         }
         else if (i<=subLast) {
-            char name[6] = "SUB";
-            name[5] = '/0';
-            if (i-subFirst<10) {
-                /* single digits*/
-                name[3] = (char) (i-subFirst+48);
-                name[4] = '/0';
-            }
-            else {
+            units[i].name[0] = 'S';
+            units[i].name[1] = 'U';
+            units[i].name[2] = 'B';
+            /* single digits*/
+            units[i].name[3] = (char)(i - subFirst + 48);
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - subFirst >= 10) {
                 /* double digits*/
-                int decVal = i-subFirst;
-                name[3] = (char) ((decVal/10) + 48);
-                name[4] = (char) ((decVal%10) + 48);
+                int decVal = i - subFirst;
+                units[i].name[3] = (char)((decVal / 10) + 48);
+                units[i].name[4] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,subDelay);
-            writeUnitType(i,1);
+            initUnit(i, subDelay, 1);
         }
         else if (i<=multLast) {
-            char name[6] = "MUL";
-            name[5] = '/0';
-            if (i-multFirst<10) {
-                /* single digits*/
-                name[3] = (char) (i-multFirst+48);
-                name[4] = '/0';
-            }
-            else {
+            units[i].name[0] = 'M';
+            units[i].name[1] = 'U';
+            units[i].name[2] = 'L';
+            /* single digits*/
+            units[i].name[3] = (char)(i - multFirst + 48);
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - multFirst >= 10) {
                 /* double digits*/
-                int decVal = i-multFirst;
-                name[3] = (char) ((decVal/10) + 48);
-                name[4] = (char) ((decVal%10) + 48);
+                int decVal = i - multFirst;
+                units[i].name[3] = (char)((decVal / 10) + 48);
+                units[i].name[4] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,multDelay);
-            writeUnitType(i,2);
+            initUnit(i, multDelay, 2);
+
         }
         else if (i<=divLast) {
-            char name[6] = "DIV";
-            name[5] = '/0';
-            if (i-divFirst<10) {
-                /* single digits*/
-                name[3] = (char) (i-divFirst+48);
-                name[4] = '/0';
-            }
-            else {
+            units[i].name[0] = 'D';
+            units[i].name[1] = 'I';
+            units[i].name[2] = 'V';
+            /* single digits*/
+            units[i].name[3] = (char)(i - divFirst + 48);
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - divFirst >= 10) {
                 /* double digits*/
-                int decVal = i-divFirst;
-                name[3] = (char) ((decVal/10) + 48);
-                name[4] = (char) ((decVal%10) + 48);
+                int decVal = i - divFirst;
+                units[i].name[3] = (char)((decVal / 10) + 48);
+                units[i].name[4] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,divDelay);
-            writeUnitType(i,3);
+            initUnit(i, divDelay, 3);
         }
         else if (i<=loadLast) {
-            char name[5] = "LD";
-            name[4] = '/0';
-            if (i-loadFirst<10) {
-                /* single digits*/
-                name[2] = (char) (i-loadFirst+48);
-                name[3] = '/0';
-            }
-            else {
+            units[i].name[0] = 'L';
+            units[i].name[1] = 'D';
+            /* single digits*/
+            units[i].name[2] = (char)(i - loadFirst + 48);
+            units[i].name[3] = '\0';
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - loadFirst >= 10) {
                 /* double digits*/
-                int decVal = i-loadFirst;
-                name[2] = (char) ((decVal/10) + 48);
-                name[3] = (char) ((decVal%10) + 48);
+                int decVal = i - loadFirst;
+                units[i].name[2] = (char)((decVal / 10) + 48);
+                units[i].name[3] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,loadDelay);
-            writeUnitType(i,4);
+            initUnit(i, loadDelay, 4);
         }
         else if (i<=storeLast) {
-            char name[5] = "ST";
-            name[4] = '/0';
-            if (i-storeFirst<10) {
-                /* single digits*/
-                name[2] = (char) (i-storeFirst+48);
-                name[3] = '/0';
-            }
-            else {
+            units[i].name[0] = 'S';
+            units[i].name[1] = 'T';
+            /* single digits*/
+            units[i].name[2] = (char)(i - storeFirst + 48);
+            units[i].name[3] = '\0';
+            units[i].name[4] = '\0';
+            units[i].name[5] = '\0';
+            if (i - storeFirst >= 10) {
                 /* double digits*/
-                int decVal = i-storeFirst;
-                name[2] = (char) ((decVal/10) + 48);
-                name[3] = (char) ((decVal%10) + 48);
+                int decVal = i - storeFirst;
+                units[i].name[2] = (char)((decVal / 10) + 48);
+                units[i].name[3] = (char)((decVal % 10) + 48);
             }
-            writeUnitName(i,name);
-            writeUnitCurrDelay(i,storeDelay);
-            writeUnitType(i,5);
+            initUnit(i, storeDelay, 5);
         }
     }
 }
@@ -172,7 +161,7 @@ int findTraceUnit(char* line) {
                     num = storeFirst+numVal;
                     break;
                 
-                case 'S':
+                case 'D':
                     if (line[i-2]=='D') /* unit type is add*/ {
                         num = addFirst+numVal;
                     }
@@ -203,8 +192,23 @@ int findNum(char* line) {
             }
             num += ((int) line[i] -48);
         }
+        if (line[i]=='\n') {
+            /* we have gone over the whole number*/
+            return num;
+        }
     }
     return num;
+}
+
+void initUnit(int index, int currDelay, int type) {
+    units[index].currentDelay = currDelay;
+    units[index].type = type;
+    units[index].busy = 0;
+    units[index].dest = -1;
+    units[index].s0 = -1;
+    units[index].s1 = -1;
+    units[index].imm = -1;
+    units[index].isAfterReadOp = 0;
 }
 
 
@@ -307,10 +311,10 @@ int findRowNum(char * line) {
         }
 
         else if (line[1]=='t') /*st*/ {
-            if (line[4]=='n') /* st_nr_units*/ {
+            if (line[3]=='n') /* st_nr_units*/ {
                 return 5;
             }
-            else if (line[4]=='d') /*st_delay*/ {
+            else if (line[3]=='d') /*st_delay*/ {
                 return 11;
             }
         }
@@ -332,10 +336,10 @@ int findRowNum(char * line) {
             }
     }
     else if (line[0]=='l') { /*ld*/
-            if (line[4]=='n') /* ld_nr_units*/ {
+            if (line[3]=='n') /* ld_nr_units*/ {
                 return 4;
             }
-            else if (line[4]=='d') /*ld_delay*/ {
+            else if (line[3]=='d') /*ld_delay*/ {
                 return 10;
             }
     }
@@ -348,7 +352,7 @@ int findRowNum(char * line) {
 int findAvailableUnitType(int type) { /* return unit index if available*/
     switch (type)
     {
-    case 0: /* add */
+    case 2: /* add */
         for (int i=addFirst;i<addLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -357,7 +361,7 @@ int findAvailableUnitType(int type) { /* return unit index if available*/
         /* no available unit found*/
         break;
 
-    case 1: /* sub */
+    case 3: /* sub */
         for (int i=subFirst;i<subLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -366,7 +370,7 @@ int findAvailableUnitType(int type) { /* return unit index if available*/
         /* no available unit found*/
         break;
     
-    case 2: /* mult */
+    case 4: /* mult */
         for (int i=multFirst;i<multLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -375,7 +379,7 @@ int findAvailableUnitType(int type) { /* return unit index if available*/
         /* no available unit found*/
         break;
 
-    case 3: /* div */
+    case 5: /* div */
         for (int i=divFirst;i<divLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -384,7 +388,7 @@ int findAvailableUnitType(int type) { /* return unit index if available*/
         /* no available unit found*/
         break;
 
-    case 4: /* load */
+    case 0: /* load */
         for (int i=loadFirst;i<loadLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -393,7 +397,7 @@ int findAvailableUnitType(int type) { /* return unit index if available*/
         /* no available unit found*/
         break;
 
-    case 5: /* store */
+    case 1: /* store */
         for (int i=storeFirst;i<storeLast+1;i++) {
             if (!isUnitBusy(i)) { /* unit not busy*/
                 return i;
@@ -415,9 +419,6 @@ char* readUnitName(int index) {
     return units[index].name;
 }
 
-void writeUnitName(int index, char* value) {
-    units[index].name = value;
-}
 
 /*1 iff busy*/
 int isUnitBusy(int index) {
@@ -475,6 +476,13 @@ void writeUnitType(int index, int value) {
     units[index].type = value;
 }
 
+int readUnitReadOpBit(int index) {
+    return units[index].isAfterReadOp;
+}
+void flipUnitReadOpBit(int index) {
+    units[index].isAfterReadOp = 1 - units[index].isAfterReadOp;
+}
+
 void updateUnitDelay(int index) {
     switch(units[index].type) {
         case 0:
@@ -505,11 +513,21 @@ void writeTraceUnit() {
     int s0;
     int s1;
     int dest;
-    char* s0Unit;
-    char* s1Unit;
-    char s0IsAv[3];
-    char s1IsAv[3];
+    char* s0Unit=NULL;
+    char* s1Unit=NULL;
+    char s0IsAv[4];
+    char s1IsAv[4];
+    int s0flag;
+    int s1flag;
     int ldCount;
+    int followS0;
+    int followS1;
+    int afterReadOp = 0;
+    ldCount = 0;
+    s0flag = 0;
+    s1flag = 0;
+    followS0 = 0;
+    followS1 = 0;
     cycle = getClock();
     if (!cycle) {/* first iteration, need to open file*/
         traceUnitFile = fopen(traceUnitPath,"w");
@@ -521,18 +539,13 @@ void writeTraceUnit() {
     if (readUnitType(traceUnit)==4) {
         dest = readUnitDest(traceUnit);
         /* load*/
-        if (!isUnitBusy(traceUnit)) { /* get inside if unit is NOT busy*/
-            ldCount = 0;
-            return;
+        afterReadOp = readUnitReadOpBit(traceUnit);
+        if (afterReadOp) {
+            fprintf(traceUnitFile, "%i %s F%i - - - - No No\n", cycle, readUnitName(traceUnit), dest);
         }
-        if (!ldCount) {
-            /* after issue, need 2 Yes*/
-            fprintf(traceUnitFile, "%i %s F%i - - - - Yes Yes\n", cycle, readUnitName(traceUnit),dest);
-            ldCount = 1;
-            return;
+        else {
+            fprintf(traceUnitFile, "%i %s F%i - - - - Yes Yes\n", cycle, readUnitName(traceUnit), dest);
         }
-        /* after read operands*/
-        fprintf(traceUnitFile, "%i %s F%i - - - - No No\n", cycle, readUnitName(traceUnit),dest);
         return;
     }
     if (readUnitType(traceUnit)==5) {
@@ -541,72 +554,121 @@ void writeTraceUnit() {
             s1 = readUnitSrc1(traceUnit);
             if (isRegUsed(s1)) /* if register=no=used*/ {
                 s1Unit = readUnitName(readRegisterStatus(s1));
-                char s1IsAv[3];
+                s1flag = 0;
                 s1IsAv[0] = 'N';
                 s1IsAv[1] = 'o';
                 s1IsAv[2] = '\0';
+                s1IsAv[3] = '\0';
                 }
             else {
-                s1Unit[0] = '-';
-                char s1IsAv[4];
+                afterReadOp = readUnitReadOpBit(traceUnit);
+                s1flag = 1;
                 s1IsAv[0] = 'Y';
                 s1IsAv[1] = 'e'; 
                 s1IsAv[2] = 's'; 
                 s1IsAv[3] = '\0';
                 }
-        fprintf(traceUnitFile, "%i %s - - F%i - %s Yes %s\n", cycle, readUnitName(traceUnit),s1,s1Unit,s1IsAv);
+            if (!s1flag) {
+                fprintf(traceUnitFile, "%i %s - - F%i - - Yes %s\n", cycle, readUnitName(traceUnit), s1, s1IsAv);
+            }
+            else {
+                if (afterReadOp) {
+                    fprintf(traceUnitFile, "%i %s - - F%i - - No No\n", cycle, readUnitName(traceUnit), s1);
+                }
+                else {
+                    fprintf(traceUnitFile, "%i %s - - F%i - - Yes Yes\n", cycle, readUnitName(traceUnit), s1);
+                }
+            }
         return;
         }
     }
-    dest = readUnitDest(traceUnit);
-    s0 = readUnitSrc0(traceUnit);
-    s1 = readUnitSrc1(traceUnit);
     if (isUnitBusy(traceUnit)) {
-        if (isRegUsed(s0)) /* if register=no=used*/ {
-            s0Unit = readUnitName(readRegisterStatus(s0));
-            char s0IsAv[3];
-            s0IsAv[0] = 'N';
-            s0IsAv[1] = 'o';
-            s0IsAv[2] = '\0'; 
+        dest = readUnitDest(traceUnit);
+        s0 = readUnitSrc0(traceUnit);
+        s1 = readUnitSrc1(traceUnit);
+        if (readUnitReadOpBit(traceUnit)) { /* need a certain structure, we are after read operands*/
+            char* unitName = readUnitName(traceUnit);
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i - - No No\n", cycle, unitName, dest,
+                s0, s1);
+            return;
         }
-        else {
-            s0Unit[0] = '-';
-            char s0IsAv[4];
+        else if (s0 != dest) {
+            if (isRegUsed(s0)) /* if register=no=used*/ {
+                s0Unit = readUnitName(readRegisterStatus(s0));
+                s0flag = 0;
+                s0IsAv[0] = 'N';
+                s0IsAv[1] = 'o';
+                s0IsAv[2] = '\0';
+                s0IsAv[3] = '\0';
+            }
+            else {
+                s0flag = 1;
+                s0IsAv[0] = 'Y';
+                s0IsAv[1] = 'e';
+                s0IsAv[2] = 's';
+                s0IsAv[3] = '\0';
+            }
+        }
+        else { /*special case where dest=s0*/
+            s0flag = 1;
             s0IsAv[0] = 'Y';
-            s0IsAv[1] = 'e'; 
-            s0IsAv[2] = 's'; 
-            s0IsAv[3] = '\0'; 
+            s0IsAv[1] = 'e';
+            s0IsAv[2] = 's';
+            s0IsAv[3] = '\0';
         }
-        if (isRegUsed(s1)) /* if register=no=used*/ {
-            s1Unit = readUnitName(readRegisterStatus(s1));
-            char s1IsAv[3];
-            s1IsAv[0] = 'N';
-            s1IsAv[1] = 'o';
-            s1IsAv[2] = '\0';
+        if (s1 != dest) {
+            if (isRegUsed(s1)) /* if register=no=used*/ {
+                s1Unit = readUnitName(readRegisterStatus(s1));
+                s1flag = 0;
+                s1IsAv[0] = 'N';
+                s1IsAv[1] = 'o';
+                s1IsAv[2] = '\0';
+                s1IsAv[3] = '\0';
+            }
+            else {
+                s1flag = 1;
+                s1IsAv[0] = 'Y';
+                s1IsAv[1] = 'e';
+                s1IsAv[2] = 's';
+                s1IsAv[3] = '\0';
+            }
         }
-        else {
-            s1Unit[0] = '-';
-            char s1IsAv[4];
+        else { /* special case where s1=dest*/
+            s1flag = 1;
             s1IsAv[0] = 'Y';
-            s1IsAv[1] = 'e'; 
-            s1IsAv[2] = 's'; 
+            s1IsAv[1] = 'e';
+            s1IsAv[2] = 's';
             s1IsAv[3] = '\0';
         }
-        if (readUnitType(traceUnit)==5) {
-            /* store unit*/
-            fprintf(traceUnitFile, "%i %s - - F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+        
+        char* unitName = readUnitName(traceUnit);
+        if (s1flag && s0flag) {
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i - - %s %s\n", cycle, unitName, dest,
+                s0, s1, s0IsAv, s1IsAv);
+
+        }
+        else if (s1flag && !s0flag) {
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i %s - %s %s\n", cycle, unitName, dest,
+                s0, s1, s0Unit, s0IsAv, s1IsAv);
+
+        }
+        else if (!s1flag && s0flag) {
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i - %s %s %s\n", cycle, unitName, dest,
+                s0, s1, s1Unit, s0IsAv, s1IsAv);
+
         }
         else {
-            fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, readUnitName(traceUnit),dest,
-        s0,s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+            fprintf(traceUnitFile, "%i %s F%i F%i F%i %s %s %s %s\n", cycle, unitName, dest,
+                s0, s1, s0Unit, s1Unit, s0IsAv, s1IsAv);
+        }
+
         }
 
     }
 
 
-}
 
 void exitUnits() {
-    fclose(traceUnitPath);
+    fclose(traceUnitFile);
     free(units);
 }

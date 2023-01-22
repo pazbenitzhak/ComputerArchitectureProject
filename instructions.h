@@ -1,7 +1,11 @@
+#ifndef INSTRUCTIONS_H
+#define INSTRUCTIONS_H
+
 #include "stdio.h"
 #include "stdlib.h"
 #include "memory.h"
 #include "units.h"
+#include "clock.h"
 
 #define true 1
 #define ADD 0
@@ -42,6 +46,7 @@ struct instruction
 
 
 void initInstructions(char* path);
+int getInstructionsNum();
 int* translateInstruction(int index);
 float readInstructionInst(int index);
 void writeInstructionInst(int index, float value);
@@ -71,4 +76,7 @@ int executeInstruction(int index);
 void writeResultInstruction(int index);
 void fetchInstruction(int index);
 void incrementFetchQueue(int index);
+int findInstNumFromMem();
 void exitInstructions();
+
+#endif

@@ -1,8 +1,12 @@
+#ifndef UNITS_H
+#define UNITS_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "clock.h"
 #include "registers.h"
+#include "instructions.h"
 
 
 #define UNIT_MEMORY_LINE_LEN 24
@@ -39,7 +43,7 @@ static struct unit* units;
 
 
 struct unit {
-    char* name;
+    char name[6];
     int busy;
     int dest;
     int s0;
@@ -47,15 +51,16 @@ struct unit {
     int imm; /* represents the immediate value parsed from the file*/
     int currentDelay;
     int type;
+    int isAfterReadOp; /*1 if so*/
 };
 
 /* goes through the cfg.txt file and saves the parameters
 Will read trace_unit and convert it to the right index*/
 void initUnits(char* cfgPath, char* tracePath);
 char* readUnitName(int index);
-void writeUnitName(int index, char* value);
 int isUnitBusy(int index);
 void flipUnitBusy(int index);
+void initUnit(int index, int currDelay, int type);
 int readUnitDest(int index);
 void writeUnitDest(int index, int value);
 int readUnitSrc0(int index);
@@ -74,5 +79,9 @@ int findTraceUnit(char* line);
 int findRowNum(char * line);
 void writeTraceUnit();
 int findAvailableUnitType(int type);
+int readUnitReadOpBit(int index);
+void flipUnitReadOpBit(int index);
 void updateUnitDelay(int index);
 void exitUnits();
+
+#endif
